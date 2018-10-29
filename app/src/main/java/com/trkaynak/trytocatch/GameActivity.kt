@@ -9,6 +9,11 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
+import com.android.volley.AuthFailureError
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_game.*
 import java.util.*
 
@@ -25,6 +30,7 @@ class GameActivity : AppCompatActivity() {
     var runnable: Runnable = Runnable {}
     var mCountDownTimer: CountDownTimer? = null
     var countdownPeriod: Long = 0
+    var insertUrl="https://ios-android.trkaynak.com/tryinsert.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +85,10 @@ class GameActivity : AppCompatActivity() {
                 val intent = intent
                 intent.putExtra("score",score)
                 btnStart.visibility = View.VISIBLE
+
+                //add mysql
+
+                save()
             }
 
             override fun onTick(millisUntilFinished: Long) {
@@ -170,5 +180,24 @@ class GameActivity : AppCompatActivity() {
         listIntent.putExtra("name",nameRecived)
         listIntent.putExtra("score",score.toString())
         startActivity(listIntent)
+    }
+
+    val queue = Volley.newRequestQueue(this)
+    fun save(){
+        val request = StringRequest(Request.Method.POST,insertUrl, Response.Listener<String> {response ->
+
+            @Throws(AuthFailureError::class)
+            fun getParams(): Map<String, String> {
+                val parameters = HashMap<String, String>()
+                parameters["name"] = nameRecived.toString()
+                parameters["score"] = score.toString()
+                return parameters
+            }
+
+        }, Response.ErrorListener {
+            error( println("HATA"))
+        })
+
+        queue.add(request)
     }
 }
