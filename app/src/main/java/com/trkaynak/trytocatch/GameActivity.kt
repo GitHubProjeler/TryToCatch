@@ -12,14 +12,18 @@ import android.widget.Toast
 import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_game.*
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
+import kotlin.collections.HashMap
 
 class GameActivity : AppCompatActivity() {
 
-    var nameRecived:String=""
+    private lateinit var nameRecived:String
     private lateinit var scoreSound: MediaPlayer
     private lateinit var addSound: MediaPlayer
     private lateinit var subSound: MediaPlayer
@@ -36,21 +40,26 @@ class GameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        val intent = intent
+        try {
+            val intent = intent
 
-        nameRecived = intent.getStringExtra("name")
-        userName.text = "Name: "+ nameRecived
+            nameRecived = intent.getStringExtra("name")
+            userName.text = "Name: "+ nameRecived
 
-        score = 0
-        imageArray = arrayListOf(imageView,imageView1,imageView2,imageView3,imageView4,imageView5,imageView6,imageView7,imageView8,imageView9,imageView10,imageView11,imageView12,imageView13,imageView14,imageView15,imageView16,imageView17,imageView18,imageView19,imageView20,imageView21,imageView22,imageView23,imageView24,imageView25,imageView26)
-        hideImage()
-       btnStart.visibility = View.INVISIBLE
+            score = 0
+            imageArray = arrayListOf(imageView,imageView1,imageView2,imageView3,imageView4,imageView5,imageView6,imageView7,imageView8,imageView9,imageView10,imageView11,imageView12,imageView13,imageView14,imageView15,imageView16,imageView17,imageView18,imageView19,imageView20,imageView21,imageView22,imageView23,imageView24,imageView25,imageView26)
+            hideImage()
+            btnStart.visibility = View.INVISIBLE
 
-        countdownPeriod = 5000
-        createCountDownTimer()
-        scoreSound = MediaPlayer.create(this,R.raw.score)
-        addSound = MediaPlayer.create(this,R.raw.add)
-        subSound = MediaPlayer.create(this, R.raw.out)
+            countdownPeriod = 5000
+            createCountDownTimer()
+            scoreSound = MediaPlayer.create(this,R.raw.score)
+            addSound = MediaPlayer.create(this,R.raw.add)
+            subSound = MediaPlayer.create(this, R.raw.out)
+        } catch (e: Exception){
+            println("Game Activity HATA: "+e)
+        }
+
     }
 
         fun onTouch():Boolean{
@@ -86,9 +95,6 @@ class GameActivity : AppCompatActivity() {
                 intent.putExtra("score",score)
                 btnStart.visibility = View.VISIBLE
 
-                //add mysql
-
-                save()
             }
 
             override fun onTick(millisUntilFinished: Long) {
@@ -175,29 +181,39 @@ class GameActivity : AppCompatActivity() {
         createCountDownTimer()
         btnStart.visibility = View.INVISIBLE
     }
+
+    val requestQueue = Volley.newRequestQueue(this)
     fun list(view: View){
         val listIntent = Intent(applicationContext,ScoreListActivity::class.java)
         listIntent.putExtra("name",nameRecived)
         listIntent.putExtra("score",score.toString())
+        save()
         startActivity(listIntent)
     }
 
-    val queue = Volley.newRequestQueue(this)
+
     fun save(){
-        val request = StringRequest(Request.Method.POST,insertUrl, Response.Listener<String> {response ->
-
-            @Throws(AuthFailureError::class)
-            fun getParams(): Map<String, String> {
-                val parameters = HashMap<String, String>()
-                parameters["name"] = nameRecived.toString()
-                parameters["score"] = score.toString()
-                return parameters
+        val stringRequest = object : StringRequest(Request.Method.POST,insertUrl, Response.Listener<String> {
+         response ->
+            try {
+                val obj = JSONObject(response)
+                Toast.makeText(applicationContext,obj.getString("Message"),Toast.LENGTH_LONG).show()
+            } catch (e: JSONException){
+                e.printStackTrace()
             }
-
-        }, Response.ErrorListener {
-            error( println("HATA"))
-        })
-
-        queue.add(request)
+        }, object : Response.ErrorListener{
+            override fun onErrorResponse(error: VolleyError?) {
+                Toast.makeText(applicationContext,error.toString(),Toast.LENGTH_LONG).show()
+            }
+        }){
+            @Throws(AuthFailureError::class)
+            override fun getParams():Map<String,String>{
+                val params = HashMap<String,String>()
+                params.put("name",nameRecived)
+                params.put("score",score.toString())
+                return params
+            }
+        }
+        VolleySingleton.instance?.addToRequestQueu(stringRequest)
     }
 }

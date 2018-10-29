@@ -16,13 +16,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun game(view: View){
-        if (nameText.text.isEmpty()){
-            Toast.makeText(applicationContext,"Name is cannot be empty...",Toast.LENGTH_LONG).show()
-        }else {
-            val gameIntent = Intent(applicationContext, GameActivity::class.java)
-            gameIntent.putExtra("name", nameText.text.toString())
-            startActivity(gameIntent)
+        try {
+            if (nameText.text.isEmpty()){
+                Toast.makeText(applicationContext,"Name is cannot be empty...",Toast.LENGTH_LONG).show()
+            }else {
+                val gameIntent = Intent(applicationContext, GameActivity::class.java)
+                gameIntent.putExtra("name", nameText.text.toString())
+                startActivity(gameIntent)
+            }
+        } catch (e:Exception){
+            println("Game button HATA:"+e)
         }
+
     }
 
     fun list(view: View){
