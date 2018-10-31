@@ -20,6 +20,8 @@ class GameActivity : AppCompatActivity() {
     private lateinit var addSound: MediaPlayer
     private lateinit var subSound: MediaPlayer
     var score = 0
+    var time1 = 5000
+    var time2 = 6000
     var imageArray = ArrayList<ImageView>()
     var timeAdd = ArrayList<ImageView>()
     var handler: Handler = Handler()
@@ -44,14 +46,14 @@ class GameActivity : AppCompatActivity() {
             hideImage()
             btnStart.visibility = View.INVISIBLE
 
-            countdownPeriod = 5000
+            countdownPeriod = 15000
             createCountDownTimer()
-         //   scoreSound = MediaPlayer.create(this,R.raw.score)
-         //   addSound = MediaPlayer.create(this,R.raw.add)
-         //   subSound = MediaPlayer.create(this, R.raw.out)
+            scoreSound = MediaPlayer.create(this,R.raw.score)
+            addSound = MediaPlayer.create(this,R.raw.add)
+            subSound = MediaPlayer.create(this, R.raw.out)
         } catch (e: Exception){
             println("Game Activity HATA: "+e)
-            Log.e("HATA","ATA")
+            Log.e("HATA","onCreate Hatası")
         }
 
     }
@@ -131,7 +133,6 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun hideImage() {
-        try {
             runnable = object : Runnable{
                 override fun run() {
                     for (image in imageArray){
@@ -146,29 +147,91 @@ class GameActivity : AppCompatActivity() {
 
                     imageArray[index].visibility = View.VISIBLE
 
-                    //Show Time
-                    val x = random.nextInt(1500 - 200)
-                    handler.postDelayed(runnable, x.toLong())
+                    //Show Time image
+                     val x = random.nextInt(time2 - time1)
+                     handler.postDelayed(runnable, x.toLong())
                 }
             }
             handler.post(runnable)
-        } catch (e: Exception){
-            println("HATA hide"+e)
-        }
-
     }
 
     fun increaseScore(view: View){
         score++
+        if(score <= 3){
+            time1 = 3000
+            time2 = 3500
+            leveltextView.text = "Level: 1"
+            hideImage()
+        } else if (score <= 7){
+            time1 = 2000
+            time2 = 2500
+            leveltextView.text = "Level: 2"
+            hideImage()
+        } else if (score <= 15){
+            time1 = 1000
+            time2 = 1500
+            leveltextView.text = "Level: 3"
+            hideImage()
+        }else if (score <= 20){
+            time1 = 800
+            time2 = 1000
+            leveltextView.text = "Level: 4"
+            hideImage()
+        } else if (score > 20){
+            time1 = 400
+            time2 = 800
+            leveltextView.text = "Level: 5"
+            hideImage()
+        } else {
+            time1 = 5000
+            time2 = 6000
+            leveltextView.text = "Level: #Hata"
+            hideImage()
+        }
         scoreText.text = "Score : " + score.toString()
-     //   scoreSound.start()
+        scoreSound.start()
+       // level()
     }
-
+    /*
+    fun level(){
+       if(score <= 3){
+           time1 = 3000
+           time2 = 3500
+           leveltextView.text = "Level: 1"
+           hideImage()
+       } else if (score <= 7){
+          time1 = 2000
+           time2 = 2500
+           leveltextView.text = "Level: 2"
+           hideImage()
+       } else if (score <= 15){
+           time1 = 1000
+           time2 = 1500
+           leveltextView.text = "Level: 3"
+           hideImage()
+       }else if (score <= 20){
+           time1 = 800
+           time2 = 1000
+           leveltextView.text = "Level: 4"
+           hideImage()
+       } else if (score > 20){
+           time1 = 400
+           time2 = 800
+           leveltextView.text = "Level: 5"
+           hideImage()
+       } else {
+           time1 = 5000
+           time2 = 6000
+           leveltextView.text = "Level: #Hata"
+           hideImage()
+       }
+   }
+    */
     fun addTime(view: View){
         onTouch()
         countdownPeriod = countdownPeriod + 5000
         timeText.text = "Timer : " + countdownPeriod.toString()
-    //    addSound.start()
+        addSound.start()
     }
     fun outTime(view: View){
         onTouch2()
@@ -177,7 +240,7 @@ class GameActivity : AppCompatActivity() {
             timeText.text = "Timer : 0"
         } else
             timeText.text = "Timer : " + countdownPeriod.toString()
-     //   subSound.start()
+            subSound.start()
     }
     fun start(view: View){
         score = 0
@@ -187,7 +250,6 @@ class GameActivity : AppCompatActivity() {
         createCountDownTimer()
         btnStart.visibility = View.INVISIBLE
     }
-
   //  val requestQueue = Volley.newRequestQueue(this)
     fun list(view: View){
         val listIntent = Intent(applicationContext,ScoreListActivity::class.java)
@@ -196,8 +258,6 @@ class GameActivity : AppCompatActivity() {
         save()
         startActivity(listIntent)
     }
-
-
     fun save(){
         /*
         val stringRequest = object : StringRequest(Request.Method.POST,insertUrl, Response.Listener<String> {
