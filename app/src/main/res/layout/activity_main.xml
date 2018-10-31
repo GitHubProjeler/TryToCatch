@@ -13,7 +13,7 @@
         android:layout_height="43dp"
         android:layout_marginStart="76dp"
         android:layout_marginTop="30dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="29dp"
         android:background="@color/colorAccent"
         android:ems="10"
         android:hint="Name"

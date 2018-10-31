@@ -31,8 +31,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun list(view: View){
+        try {
             val listIntent = Intent(applicationContext,ScoreListActivity::class.java)
+            listIntent.putExtra("name",nameText.getText().toString())
+
             startActivity(listIntent)
+        } catch (e:Exception){
+            println("HATA List:"+e)
+        }
+
 
     }
 }

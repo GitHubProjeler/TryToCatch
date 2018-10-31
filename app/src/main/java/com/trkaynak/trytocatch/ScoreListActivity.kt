@@ -6,14 +6,16 @@ import kotlinx.android.synthetic.main.activity_score_list.*
 
 class ScoreListActivity : AppCompatActivity() {
 
+    lateinit var name: String
+    lateinit var score:String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_score_list)
 
         try {
             val intent = intent
-            val name: String = intent.getStringExtra("name")
-            val score: String = intent.getStringExtra("score")
+            name = intent.getStringExtra("name")
+            score = intent.getStringExtra("score")
             nametextViewScore.text = "Name: "+name+" Score: "+score
         }catch (e: Exception){
             println("HATA:"+e)
